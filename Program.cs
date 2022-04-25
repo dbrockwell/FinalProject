@@ -27,6 +27,7 @@ namespace FinalProject
                 Console.WriteLine("9) Display all active products for specified category");
                 Console.WriteLine("10) Delete record from products table");
                 Console.WriteLine("11) Delete record from categories table");
+                Console.WriteLine("\"q\" to quit");
                 choose = Console.ReadLine();
                 Console.Clear();
                 logger.Info($"Option {choose} selected");
