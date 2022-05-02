@@ -15,6 +15,7 @@ namespace FinalProject
         static void Main(string[] args)
         {
             string choose;
+            logger.Info("Program Started");
             do {
                 Console.WriteLine("1) Add to products table");
                 Console.WriteLine("2) Edit record from products table");
@@ -76,6 +77,7 @@ namespace FinalProject
                     
                 }
             } while (choose.ToLower() != "q");
+            logger.Info("Program Ended");
         }
     }
 }
