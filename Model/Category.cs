@@ -14,7 +14,7 @@ namespace NorthwindConsole.Model
         }
 
         public int CategoryId { get; set; }
-        [Required(ErrorMessage = "YO - Enter the name!")]
+        [Required(ErrorMessage = "A name needs to be entered for category")]
         public string CategoryName { get; set; }
         public string Description { get; set; }
 
