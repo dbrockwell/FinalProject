@@ -213,10 +213,21 @@ namespace FinalProject
                 var isValid = Validator.TryValidateObject(product, context, results, true);
                 if (isValid)
                 {
+                    bool validForeign = db.Suppliers.Any(s => s.SupplierId == product.SupplierId) && db.Categories.Any(c => c.CategoryId == product.CategoryId);
+                    bool supplierValid = db.Suppliers.Any(s => s.SupplierId == product.SupplierId);
+                    bool categoryValid = db.Categories.Any(c => c.CategoryId == product.CategoryId);
                     if (db.Products.Any(p => p.ProductName == product.ProductName))
                     {
                         isValid = false;
                         results.Add(new ValidationResult("Name exists", new string[] { "ProductName" }));
+                    }
+                    else if (validForeign == false)
+                    {
+                        isValid = false;
+                        if (supplierValid == false) {
+                            results.Add(new ValidationResult("SupplierID does not exists", new string[] { "SupplierId" }));}
+                        if (categoryValid == false) {
+                            results.Add(new ValidationResult("CategoryID does not exists", new string[] { "CategoryId" }));}
                     }
                     else
                     {
