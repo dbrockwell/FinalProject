@@ -81,7 +81,8 @@ namespace FinalProject
                 }
                 else if (choose == "3")
                 {
-                    
+                    var db = new NWConsole_48_DABContext();
+                    ShowProducts(db);
                 }
                 else if (choose == "4")
                 {
