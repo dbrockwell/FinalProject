@@ -111,14 +111,20 @@ namespace FinalProject
                         }
                     } while (loop == true);
                     if (product != null) {
-                        string[] chartHeaders = {"ProductId", "ProductName", "SupplierId", "CategoryId", "QuantityPerUnit", "UnitPrice", "UnitsInStock", "UnitsOnOrder", "ReorderLevel", "Discontinued"};
+                        Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine($"{"ProductId", -9} | {"ProductName", -50} | {"SupplierId", -10} | {"CategoryId", -10} | {"QuantityPerUnit", -20} | {"UnitPrice", -9} | {"UnitsInStock", -12} | {"UnitsOnOrder", -12} | {"ReorderLevel", -12} | {"Discontinued", -12}");
                         Console.WriteLine($"{product.ProductId, -9} | {product.ProductName, -50} | {product.SupplierId, -10} | {product.CategoryId, -10} | {product.QuantityPerUnit, -20} | {product.UnitPrice, -9} | {product.UnitsInStock, -12} | {product.UnitsOnOrder, -12} | {product.ReorderLevel, -12} | {product.Discontinued, -12}");
+                        Console.ForegroundColor = ConsoleColor.White;
                     }
                 }
                 else if (choose == "5")
                 {
-                    
+                    var db = new NWConsole_48_DABContext();
+                    Category category = InputCategory(db, 0);
+                    if (category != null) {
+                       db.AddCategory(category);
+                       logger.Info($"Category Added - {category.CategoryName}");
+                    }
                 }
                 else if (choose == "6")
                 {
@@ -408,6 +414,69 @@ namespace FinalProject
                     return null;
                 }
                 return product;
+            }
+            else {
+                logger.Info("Add to products have been canceled");
+                return null;
+            }
+        }
+        public static Category InputCategory(NWConsole_48_DABContext db, int categoryId){
+            Category category = new Category();
+            Category currentCategory = null;
+            if (categoryId != 0) {
+                currentCategory = db.Categories.FirstOrDefault(c => c.CategoryId == categoryId);
+                Console.WriteLine("Press enter to skip any fields");
+            }
+            Console.WriteLine("Enter Category Name:");
+            if (currentCategory != null) {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Current Category Name: {currentCategory.CategoryName} [press \"Enter\" to use]");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            string categoryName = Console.ReadLine();
+            if (category.CategoryName != "" || categoryId != 0) {
+                if (currentCategory != null && categoryName == "") {
+                    category.CategoryName = currentCategory.CategoryName;
+                }
+                else {
+                    category.CategoryName = categoryName;
+                }
+                Console.WriteLine("Enter the Category Description:");
+                string description = Console.ReadLine();
+                if (currentCategory != null && description == "") {
+                    category.Description = currentCategory.Description;
+                }
+                else {
+                    category.Description = description;
+                }
+                
+                ValidationContext context = new ValidationContext(category, null, null);
+                List<ValidationResult> results = new List<ValidationResult>();
+
+                var isValid = Validator.TryValidateObject(category, context, results, true);
+                if (isValid)
+                {
+                    if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
+                    {
+                        isValid = false;
+                        results.Add(new ValidationResult("Name exists", new string[] { "CategoryName" }));
+                    }
+                    else
+                    {
+                        logger.Info("Validation passed");
+                    }
+                }
+                if (!isValid)
+                {
+                    foreach (var result in results)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        logger.Error($"{result.MemberNames.First()} : {result.ErrorMessage}");
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                    return null;
+                }
+                return category;
             }
             else {
                 logger.Info("Add to products have been canceled");
