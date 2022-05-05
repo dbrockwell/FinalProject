@@ -38,8 +38,7 @@ namespace FinalProject
                     Product product = InputProduct(db, 0);
                     if (product != null) {
                        db.AddProduct(product);
-                       //Console.WriteLine(product.SupplierId);
-                        logger.Info($"Product Added - {product.ProductName}");
+                       logger.Info($"Product Added - {product.ProductName}");
                     }
                 }
                 else if (choose == "2")
@@ -86,7 +85,36 @@ namespace FinalProject
                 }
                 else if (choose == "4")
                 {
-                    
+                    var db = new NWConsole_48_DABContext();
+                    bool loop = false;
+                    Product product = null;
+                    do {
+                        Console.WriteLine("Enter The ID of the Product:");
+                        ShowProducts(db);
+                        try{
+                            int productId = int.Parse(Console.ReadLine());
+                            if (db.Products.Any(p => p.ProductId == productId)) {
+                                product = db.Products.FirstOrDefault(p => p.ProductId == productId);
+                                loop = false;
+                            }
+                            else {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                logger.Error("ProductId does not exist");
+                                Console.ForegroundColor = ConsoleColor.White;
+                                loop = true;
+                            }
+                        } catch (Exception) {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            logger.Error("Whole Number was not entered");
+                            Console.ForegroundColor = ConsoleColor.White;
+                            loop = true;
+                        }
+                    } while (loop == true);
+                    if (product != null) {
+                        string[] chartHeaders = {"ProductId", "ProductName", "SupplierId", "CategoryId", "QuantityPerUnit", "UnitPrice", "UnitsInStock", "UnitsOnOrder", "ReorderLevel", "Discontinued"};
+                        Console.WriteLine($"{"ProductId", -9} | {"ProductName", -50} | {"SupplierId", -10} | {"CategoryId", -10} | {"QuantityPerUnit", -20} | {"UnitPrice", -9} | {"UnitsInStock", -12} | {"UnitsOnOrder", -12} | {"ReorderLevel", -12} | {"Discontinued", -12}");
+                        Console.WriteLine($"{product.ProductId, -9} | {product.ProductName, -50} | {product.SupplierId, -10} | {product.CategoryId, -10} | {product.QuantityPerUnit, -20} | {product.UnitPrice, -9} | {product.UnitsInStock, -12} | {product.UnitsOnOrder, -12} | {product.ReorderLevel, -12} | {product.Discontinued, -12}");
+                    }
                 }
                 else if (choose == "5")
                 {
