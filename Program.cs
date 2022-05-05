@@ -179,11 +179,45 @@ namespace FinalProject
                 }
                 else if (choose == "8")
                 {
-                    
+                    var db = new NWConsole_48_DABContext();
+                    var query = db.Categories.Include("Products").OrderBy(p => p.CategoryId);
+                    foreach (Category c in query) {
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        Console.WriteLine(c.CategoryName);
+                        Console.ForegroundColor = ConsoleColor.White;
+                        foreach (Product p in c.Products)
+                        {
+                            if (p.Discontinued == false) {
+                                Console.WriteLine("\t" + p.ProductName);
+                            }
+                        }
+                    }
                 }
                 else if (choose == "9")
                 {
-                    
+                    var db = new NWConsole_48_DABContext();
+                    var query = db.Categories.OrderBy(p => p.CategoryId);
+
+                    Console.WriteLine("Select the category whose products you want to display:");
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    foreach (var item in query)
+                    {
+                        Console.WriteLine($"{item.CategoryId}) {item.CategoryName}");
+                    }
+                    Console.ForegroundColor = ConsoleColor.White;
+                    int id = int.Parse(Console.ReadLine());
+                    Console.Clear();
+                    logger.Info($"CategoryId {id} selected");
+                    Category category = db.Categories.Include("Products").FirstOrDefault(c => c.CategoryId == id);
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    Console.WriteLine($"{category.CategoryName} - {category.Description}");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    foreach (Product p in category.Products)
+                    {
+                        if (p.Discontinued == false) {
+                            Console.WriteLine("\t" + p.ProductName);
+                        }
+                    }
                 }
                 else if (choose == "10")
                 {
