@@ -128,7 +128,40 @@ namespace FinalProject
                 }
                 else if (choose == "6")
                 {
-                    
+                     var db = new NWConsole_48_DABContext();
+                    bool loop = false;
+                    Category category = null;
+                    do {
+                        Console.WriteLine("Choose a category for editing:");
+                        ShowCategories(db);
+                        try{
+                            int categoryIdWrite = int.Parse(Console.ReadLine());
+                            if (db.Categories.Any(c => c.CategoryId == categoryIdWrite)) {
+                                category = db.Categories.FirstOrDefault(p => p.CategoryId == categoryIdWrite);
+                                loop = false;
+                            }
+                            else {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                logger.Error("CategoryId does not exist");
+                                Console.ForegroundColor = ConsoleColor.White;
+                                loop = true;
+                            }
+                        } catch (Exception) {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            logger.Error("Whole Number was not entered");
+                            Console.ForegroundColor = ConsoleColor.White;
+                            loop = true;
+                        }
+                    } while (loop == true);
+                    if (category != null) {
+                        int categoryId = category.CategoryId;
+                        Category updatedCategory = InputCategory(db, categoryId);
+                        if (category != null) {
+                            updatedCategory.CategoryId = category.CategoryId;
+                            db.EditCategory(updatedCategory);
+                            logger.Info($"Category (id: {category.CategoryId}) updated");
+                        }
+                    }
                 }
                 else if (choose == "7")
                 {
@@ -195,7 +228,7 @@ namespace FinalProject
                 Console.ForegroundColor = ConsoleColor.White;
             }
             string productName = Console.ReadLine();
-            if (product.ProductName != "" || productId != 0) {
+            if (productName != "" || productId != 0) {
                 if (currentProduct != null && productName == "") {
                     product.ProductName = currentProduct.ProductName;
                 }
@@ -434,7 +467,7 @@ namespace FinalProject
                 Console.ForegroundColor = ConsoleColor.White;
             }
             string categoryName = Console.ReadLine();
-            if (category.CategoryName != "" || categoryId != 0) {
+            if (categoryName != "" || categoryId != 0) {
                 if (currentCategory != null && categoryName == "") {
                     category.CategoryName = currentCategory.CategoryName;
                 }
@@ -442,6 +475,11 @@ namespace FinalProject
                     category.CategoryName = categoryName;
                 }
                 Console.WriteLine("Enter the Category Description:");
+                if (currentCategory != null) {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"Current Category Description: {currentCategory.Description} [press \"Enter\" to use]");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
                 string description = Console.ReadLine();
                 if (currentCategory != null && description == "") {
                     category.Description = currentCategory.Description;
@@ -456,7 +494,7 @@ namespace FinalProject
                 var isValid = Validator.TryValidateObject(category, context, results, true);
                 if (isValid)
                 {
-                    if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
+                    if (db.Categories.Any(c => c.CategoryName == category.CategoryName) && category.CategoryName != currentCategory.CategoryName)
                     {
                         isValid = false;
                         results.Add(new ValidationResult("Name exists", new string[] { "CategoryName" }));
@@ -479,7 +517,7 @@ namespace FinalProject
                 return category;
             }
             else {
-                logger.Info("Add to products have been canceled");
+                logger.Info("Add to categories have been canceled");
                 return null;
             }
         }
