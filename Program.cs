@@ -165,7 +165,17 @@ namespace FinalProject
                 }
                 else if (choose == "7")
                 {
-                    
+                    var db = new NWConsole_48_DABContext();
+                    var query = db.Categories.OrderBy(p => p.CategoryName);
+
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"{query.Count()} records returned");
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    foreach (var item in query)
+                    {
+                        Console.WriteLine($"{item.CategoryName} - {item.Description}");
+                    }
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
                 else if (choose == "8")
                 {
