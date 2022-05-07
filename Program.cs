@@ -44,30 +44,7 @@ namespace FinalProject
                 else if (choose == "2")
                 {
                     var db = new NWConsole_48_DABContext();
-                    bool loop = false;
-                    Product product = null;
-                    do {
-                        Console.WriteLine("Choose a product for editing:");
-                        ShowProducts(db);
-                        try{
-                            int productIdWrite = int.Parse(Console.ReadLine());
-                            if (db.Products.Any(p => p.ProductId == productIdWrite)) {
-                                product = db.Products.FirstOrDefault(p => p.ProductId == productIdWrite);
-                                loop = false;
-                            }
-                            else {
-                                Console.ForegroundColor = ConsoleColor.Red;
-                                logger.Error("ProductId does not exist");
-                                Console.ForegroundColor = ConsoleColor.White;
-                                loop = true;
-                            }
-                        } catch (Exception) {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            logger.Error("Whole Number was not entered");
-                            Console.ForegroundColor = ConsoleColor.White;
-                            loop = true;
-                        }
-                    } while (loop == true);
+                    Product product = GetProduct(db, "editing");
                     if (product != null) {
                         int productId = product.ProductId;
                         Product updatedProduct = InputProduct(db, productId);
@@ -86,34 +63,11 @@ namespace FinalProject
                 else if (choose == "4")
                 {
                     var db = new NWConsole_48_DABContext();
-                    bool loop = false;
-                    Product product = null;
-                    do {
-                        Console.WriteLine("Enter The ID of the Product:");
-                        ShowProducts(db);
-                        try{
-                            int productId = int.Parse(Console.ReadLine());
-                            if (db.Products.Any(p => p.ProductId == productId)) {
-                                product = db.Products.FirstOrDefault(p => p.ProductId == productId);
-                                loop = false;
-                            }
-                            else {
-                                Console.ForegroundColor = ConsoleColor.Red;
-                                logger.Error("ProductId does not exist");
-                                Console.ForegroundColor = ConsoleColor.White;
-                                loop = true;
-                            }
-                        } catch (Exception) {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            logger.Error("Whole Number was not entered");
-                            Console.ForegroundColor = ConsoleColor.White;
-                            loop = true;
-                        }
-                    } while (loop == true);
+                    Product product = GetProduct(db, "searching");
                     if (product != null) {
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine($"{"ProductId", -9} | {"ProductName", -50} | {"SupplierId", -10} | {"CategoryId", -10} | {"QuantityPerUnit", -20} | {"UnitPrice", -9} | {"UnitsInStock", -12} | {"UnitsOnOrder", -12} | {"ReorderLevel", -12} | {"Discontinued", -12}");
-                        Console.WriteLine($"{product.ProductId, -9} | {product.ProductName, -50} | {product.SupplierId, -10} | {product.CategoryId, -10} | {product.QuantityPerUnit, -20} | {product.UnitPrice, -9} | {product.UnitsInStock, -12} | {product.UnitsOnOrder, -12} | {product.ReorderLevel, -12} | {product.Discontinued, -12}");
+                        Console.WriteLine($"{product.ProductId, -9} | {product.ProductName, -50} | {product.SupplierId, -10} | {product.CategoryId, -10} | {product.QuantityPerUnit, -20} | {product.UnitPrice, -9 :C2} | {product.UnitsInStock, -12} | {product.UnitsOnOrder, -12} | {product.ReorderLevel, -12} | {product.Discontinued, -12}");
                         Console.ForegroundColor = ConsoleColor.White;
                     }
                 }
@@ -128,31 +82,8 @@ namespace FinalProject
                 }
                 else if (choose == "6")
                 {
-                     var db = new NWConsole_48_DABContext();
-                    bool loop = false;
-                    Category category = null;
-                    do {
-                        Console.WriteLine("Choose a category for editing:");
-                        ShowCategories(db);
-                        try{
-                            int categoryIdWrite = int.Parse(Console.ReadLine());
-                            if (db.Categories.Any(c => c.CategoryId == categoryIdWrite)) {
-                                category = db.Categories.FirstOrDefault(p => p.CategoryId == categoryIdWrite);
-                                loop = false;
-                            }
-                            else {
-                                Console.ForegroundColor = ConsoleColor.Red;
-                                logger.Error("CategoryId does not exist");
-                                Console.ForegroundColor = ConsoleColor.White;
-                                loop = true;
-                            }
-                        } catch (Exception) {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            logger.Error("Whole Number was not entered");
-                            Console.ForegroundColor = ConsoleColor.White;
-                            loop = true;
-                        }
-                    } while (loop == true);
+                    var db = new NWConsole_48_DABContext();
+                    Category category = GetCategory(db, "editing");
                     if (category != null) {
                         int categoryId = category.CategoryId;
                         Category updatedCategory = InputCategory(db, categoryId);
@@ -199,12 +130,7 @@ namespace FinalProject
                     var query = db.Categories.OrderBy(p => p.CategoryId);
 
                     Console.WriteLine("Select the category whose products you want to display:");
-                    Console.ForegroundColor = ConsoleColor.Magenta;
-                    foreach (var item in query)
-                    {
-                        Console.WriteLine($"{item.CategoryId}) {item.CategoryName}");
-                    }
-                    Console.ForegroundColor = ConsoleColor.White;
+                    ShowCategories(db);
                     int id = int.Parse(Console.ReadLine());
                     Console.Clear();
                     logger.Info($"CategoryId {id} selected");
@@ -237,6 +163,62 @@ namespace FinalProject
                 Console.WriteLine($"{p.ProductId}: {p.ProductName}");
             }
             Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        public static Product GetProduct(NWConsole_48_DABContext db, string action){
+            bool loop = false;
+            Product product = null;
+            do {
+                Console.WriteLine($"Choose a product for {action}:");
+                ShowProducts(db);
+                try{
+                    int productIdWrite = int.Parse(Console.ReadLine());
+                    if (db.Products.Any(p => p.ProductId == productIdWrite)) {
+                        product = db.Products.FirstOrDefault(p => p.ProductId == productIdWrite);
+                        loop = false;
+                    }
+                    else {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        logger.Error("ProductId does not exist");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        loop = true;
+                    }
+                } catch (Exception) {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    logger.Error("Whole Number was not entered");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    loop = true;
+                }
+            } while (loop == true);
+            return product;
+        }
+
+        public static Category GetCategory(NWConsole_48_DABContext db, string action) {
+            bool loop = false;
+            Category category = null;
+            do {
+                Console.WriteLine($"Choose a category for {action}:");
+                ShowCategories(db);
+                try{
+                    int categoryIdWrite = int.Parse(Console.ReadLine());
+                    if (db.Categories.Any(c => c.CategoryId == categoryIdWrite)) {
+                        category = db.Categories.FirstOrDefault(p => p.CategoryId == categoryIdWrite);
+                        loop = false;
+                    }
+                    else {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        logger.Error("CategoryId does not exist");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        loop = true;
+                    }
+                } catch (Exception) {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    logger.Error("Whole Number was not entered");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    loop = true;
+                }
+            } while (loop == true);
+            return category;
         }
 
         public static void ShowCategories(NWConsole_48_DABContext db){
