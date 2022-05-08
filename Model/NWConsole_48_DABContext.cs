@@ -335,6 +335,11 @@ namespace NorthwindConsole.Model
             this.SaveChanges();
         }
 
+        public void DeleteOrderDetail(OrderDetail orderDetail) {
+            this.OrderDetails.Remove(orderDetail);
+            this.SaveChanges();
+        }
+
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

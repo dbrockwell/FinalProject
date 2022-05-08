@@ -127,11 +127,7 @@ namespace FinalProject
                 else if (choose == "9")
                 {
                     var db = new NWConsole_48_DABContext();
-                    var query = db.Categories.OrderBy(p => p.CategoryId);
-
-                    Console.WriteLine("Select the category whose products you want to display:");
-                    ShowCategories(db);
-                    int id = int.Parse(Console.ReadLine());
+                    int id = GetCategoryId(db, "Select the category whose products you want to display:");
                     Console.Clear();
                     logger.Info($"CategoryId {id} selected");
                     Category category = db.Categories.Include("Products").FirstOrDefault(c => c.CategoryId == id);
@@ -147,11 +143,61 @@ namespace FinalProject
                 }
                 else if (choose == "10")
                 {
-                    
+                    var db = new NWConsole_48_DABContext();
+                    int id = GetProductId(db, "Select a product for deleting");
+                    Product product = db.Products.Include("OrderDetails").FirstOrDefault(p => p.ProductId == id);
+                    if(product != null){
+                        int productId = product.ProductId;
+                        int orderDetailCount = 0;
+                        foreach(OrderDetail od in product.OrderDetails) {
+                            if(od.ProductId == productId) {
+                                db.DeleteOrderDetail(od);
+                                orderDetailCount += 1;
+                            }
+                        }
+                        if (orderDetailCount > 0) {
+                            logger.Info($"{orderDetailCount} OrderDetails have been deleted with the Product ID of {productId}");
+                        }
+                        db.DeleteProduct(product);
+                        logger.Info($"Product (id: {productId}) deleted");
+                    }
                 }
                 else if (choose == "11")
                 {
-                    
+                    var db = new NWConsole_48_DABContext();
+                    int id = GetCategoryId(db, "Select a category for deleting:");
+                    Category category = db.Categories.Include("Products").FirstOrDefault(c => c.CategoryId == id);
+                    if(category != null) {
+                        int categoryId = category.CategoryId;
+                        int productCount = 0;
+                        foreach(Product p in category.Products) {
+                            if(p.CategoryId == categoryId) {
+                                if (db.Categories.Any(c => c.CategoryName == "<<Unknown>>")) {
+                                    Category defaultCategory = db.Categories.FirstOrDefault(c => c.CategoryName == "<<Unknown>>");
+                                    if (defaultCategory.CategoryId == categoryId) {
+                                        Console.ForegroundColor = ConsoleColor.Red;
+                                        logger.Error("The default category labled \"<<Unknown>>\" can not be deleted");
+                                        Console.ForegroundColor = ConsoleColor.White;
+                                    }
+                                    else {
+                                        UpdateProductsWithDefault(db, p.ProductId, defaultCategory.CategoryId);
+                                        productCount += 1;
+                                    }
+                                }
+                                else {
+                                    CreateDefaultCategory(db);
+                                    Category defaultCategory = db.Categories.FirstOrDefault(c => c.CategoryName == "<<Unknown>>");
+                                    UpdateProductsWithDefault(db, p.ProductId, defaultCategory.CategoryId);
+                                    productCount += 1;
+                                }
+                            }
+                        }
+                        if (productCount > 0) {
+                            logger.Info($"{productCount} Products have been modified from the Category ID of {categoryId}");
+                        }
+                        db.DeleteCategory(category);
+                        logger.Info($"Product (id: {categoryId}) deleted");
+                    }
                 }
             } while (choose.ToLower() != "q");
             logger.Info("Program Ended");
@@ -239,6 +285,62 @@ namespace FinalProject
             Console.ForegroundColor = ConsoleColor.White;
         }
 
+
+        public static int GetCategoryId(NWConsole_48_DABContext db, string prompt) {
+            bool loop = false;
+            int categoryId = 0;
+            do {
+                Console.WriteLine(prompt);
+                ShowCategories(db);
+                try{
+                    int categoryIdWrite = int.Parse(Console.ReadLine());
+                    if (db.Categories.Any(c => c.CategoryId == categoryIdWrite)) {
+                        categoryId = categoryIdWrite;
+                        loop = false;
+                    }
+                    else {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        logger.Error("CategoryId does not exist");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        loop = true;
+                    }
+                } catch (Exception) {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    logger.Error("Whole Number was not entered");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    loop = true;
+                }
+            } while (loop == true);
+            return categoryId;
+        }
+
+        public static int GetProductId(NWConsole_48_DABContext db, string action){
+            bool loop = false;
+            int productId = 0;
+            do {
+                Console.WriteLine($"Choose a product for {action}:");
+                ShowProducts(db);
+                try{
+                    int productIdWrite = int.Parse(Console.ReadLine());
+                    if (db.Products.Any(p => p.ProductId == productIdWrite)) {
+                        productId = productIdWrite;
+                        loop = false;
+                    }
+                    else {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        logger.Error("ProductId does not exist");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        loop = true;
+                    }
+                } catch (Exception) {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    logger.Error("Whole Number was not entered");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    loop = true;
+                }
+            } while (loop == true);
+            return productId;
+        }
         public static Product InputProduct(NWConsole_48_DABContext db, int productId){
             Product product = new Product();
             Product currentProduct = null;
@@ -392,7 +494,7 @@ namespace FinalProject
                     }
                 } while(loop == true);
                 do{
-                    Console.WriteLine("Enter Recorder Level:");
+                    Console.WriteLine("Enter Reorder Level:");
                     if (currentProduct != null) {
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine($"Current Product Recorder Level: {currentProduct.ReorderLevel} [press \"Enter\" to use]");
@@ -546,6 +648,30 @@ namespace FinalProject
                 logger.Info("Add to categories have been canceled");
                 return null;
             }
+        }
+
+        public static void CreateDefaultCategory(NWConsole_48_DABContext db) {
+            Category category = new Category();
+            category.CategoryName = "<<Unknown>>";
+            category.Description = "This is a default category";
+            db.AddCategory(category);
+            logger.Info("Default category was created");
+        }
+
+        public static void UpdateProductsWithDefault(NWConsole_48_DABContext db, int productId, int categoryId) {
+            Product product = new Product();
+            Product currentProduct = db.Products.FirstOrDefault(p => p.ProductId == productId);
+            product.ProductId = currentProduct.ProductId;
+            product.ProductName = currentProduct.ProductName;
+            product.SupplierId = currentProduct.SupplierId;
+            product.CategoryId = categoryId;
+            product.QuantityPerUnit = currentProduct.QuantityPerUnit;
+            product.UnitPrice = currentProduct.UnitPrice;
+            product.UnitsInStock = currentProduct.UnitsInStock;
+            product.UnitsOnOrder = currentProduct.UnitsOnOrder;
+            product.ReorderLevel = currentProduct.ReorderLevel;
+            product.Discontinued = currentProduct.Discontinued;
+            db.EditProduct(product);
         }
     }
 }
