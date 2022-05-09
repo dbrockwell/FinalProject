@@ -594,7 +594,7 @@ namespace FinalProject
                     bool validForeign = db.Suppliers.Any(s => s.SupplierId == product.SupplierId) && db.Categories.Any(c => c.CategoryId == product.CategoryId);
                     bool supplierValid = db.Suppliers.Any(s => s.SupplierId == product.SupplierId);
                     bool categoryValid = db.Categories.Any(c => c.CategoryId == product.CategoryId);
-                    if (db.Products.Any(p => p.ProductName == product.ProductName) && product.ProductName != currentProduct.ProductName)
+                    if (db.Products.Any(p => p.ProductName == product.ProductName) || product.ProductName != currentProduct.ProductName)
                     {
                         isValid = false;
                         results.Add(new ValidationResult("Name exists", new string[] { "ProductName" }));
