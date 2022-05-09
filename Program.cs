@@ -58,7 +58,23 @@ namespace FinalProject
                 else if (choose == "3")
                 {
                     var db = new NWConsole_48_DABContext();
-                    ShowProducts(db);
+                    Console.WriteLine("1) Show all products");
+                    Console.WriteLine("2) Show all active products");
+                    Console.WriteLine("3) Show all discontinued products");
+                    string productChoose = Console.ReadLine();
+                    if (productChoose == "1"){
+                        ShowActiveProducts(db);
+                        ShowDiscontinuedProducts(db);
+                        logger.Info("All products have been shown");
+                    }
+                    if (productChoose == "2") {
+                        ShowActiveProducts(db);
+                        logger.Info("All active products have been shown");
+                    }
+                    if (productChoose == "3") {
+                        ShowDiscontinuedProducts(db);
+                        logger.Info("All discontinued products have been shown");
+                    }
                 }
                 else if (choose == "4")
                 {
@@ -70,6 +86,7 @@ namespace FinalProject
                         Console.WriteLine($"{product.ProductId, -9} | {product.ProductName, -50} | {product.SupplierId, -10} | {product.CategoryId, -10} | {product.QuantityPerUnit, -20} | {product.UnitPrice, -9 :C2} | {product.UnitsInStock, -12} | {product.UnitsOnOrder, -12} | {product.ReorderLevel, -12} | {product.Discontinued, -12}");
                         Console.ForegroundColor = ConsoleColor.White;
                     }
+                    logger.Info($"All information for product {product.ProductId}: {product.ProductName} have been shown");
                 }
                 else if (choose == "5")
                 {
@@ -107,6 +124,7 @@ namespace FinalProject
                         Console.WriteLine($"{item.CategoryName} - {item.Description}");
                     }
                     Console.ForegroundColor = ConsoleColor.White;
+                    logger.Info("All categories have been shown");
                 }
                 else if (choose == "8")
                 {
@@ -123,6 +141,7 @@ namespace FinalProject
                             }
                         }
                     }
+                    logger.Info("All categories with products have been shown");
                 }
                 else if (choose == "9")
                 {
@@ -140,6 +159,7 @@ namespace FinalProject
                             Console.WriteLine("\t" + p.ProductName);
                         }
                     }
+                    logger.Info($"All products for {category.CategoryName} have been shown");
                 }
                 else if (choose == "10")
                 {
@@ -207,6 +227,34 @@ namespace FinalProject
             Console.ForegroundColor = ConsoleColor.Magenta;
             foreach(Product p in products) {
                 Console.WriteLine($"{p.ProductId}: {p.ProductName}");
+            }
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        public static void ShowActiveProducts(NWConsole_48_DABContext db){
+            var products = db.Products.OrderBy(p => p.ProductId);
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("Active Products:");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            foreach(Product p in products) {
+                if (p.Discontinued == false) {
+                    Console.WriteLine("\t" + p.ProductName);
+                }
+            }
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        public static void ShowDiscontinuedProducts(NWConsole_48_DABContext db){
+            var products = db.Products.OrderBy(p => p.ProductId);
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("Discontinued Products:");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            foreach(Product p in products) {
+                if (p.Discontinued == true) {
+                    Console.WriteLine("\t" + p.ProductName);
+                }
             }
             Console.ForegroundColor = ConsoleColor.White;
         }
