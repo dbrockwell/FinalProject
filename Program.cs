@@ -594,10 +594,18 @@ namespace FinalProject
                     bool validForeign = db.Suppliers.Any(s => s.SupplierId == product.SupplierId) && db.Categories.Any(c => c.CategoryId == product.CategoryId);
                     bool supplierValid = db.Suppliers.Any(s => s.SupplierId == product.SupplierId);
                     bool categoryValid = db.Categories.Any(c => c.CategoryId == product.CategoryId);
-                    if (db.Products.Any(p => p.ProductName == product.ProductName) || product.ProductName != currentProduct.ProductName)
+                    if (db.Products.Any(p => p.ProductName == product.ProductName))
                     {
-                        isValid = false;
-                        results.Add(new ValidationResult("Name exists", new string[] { "ProductName" }));
+                        if (currentProduct == null) {
+                            isValid = false;
+                            results.Add(new ValidationResult("Name exists", new string[] { "ProductName" }));
+                        }
+                        else {
+                            if (product.ProductName != currentProduct.ProductName) {
+                                isValid = false;
+                                results.Add(new ValidationResult("Name exists", new string[] { "ProductName" }));
+                            }
+                        }
                     }
                     else if (validForeign == false)
                     {
@@ -670,10 +678,18 @@ namespace FinalProject
                 var isValid = Validator.TryValidateObject(category, context, results, true);
                 if (isValid)
                 {
-                    if (db.Categories.Any(c => c.CategoryName == category.CategoryName) && category.CategoryName != currentCategory.CategoryName)
+                    if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
                     {
-                        isValid = false;
-                        results.Add(new ValidationResult("Name exists", new string[] { "CategoryName" }));
+                        if (currentCategory == null) {
+                            isValid = false;
+                            results.Add(new ValidationResult("Name exists", new string[] { "CategoryName" }));
+                        }
+                        else {
+                            if(category.CategoryName != currentCategory.CategoryName) {
+                                isValid = false;
+                                results.Add(new ValidationResult("Name exists", new string[] { "CategoryName" }));
+                            }
+                        }
                     }
                     else
                     {
